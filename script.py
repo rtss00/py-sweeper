@@ -11,3 +11,8 @@ for i in mf.mines:
     print(i, end=' ')
 print()
 
+# print('Full field list:')
+# count = 0
+# for i in mf.field:
+#    print("{}: {}, {} bombs nearby".format(count, i.type, mf.count_bombs()));
+#    count += 1
