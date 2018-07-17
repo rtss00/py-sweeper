@@ -25,6 +25,12 @@ class MinedField:
     def print_field(self):
         for y in range(1, self.height+1):
             for x in range(1, self.side+1):
-                sym = 'X' if self.field[self.translate_position(x, y)].type == 'BOMB' else ' '
+                point = self.field[self.translate_position(x,y)]
+                if point.type == 'EMPTY':
+                    sym = ' '
+                elif point.type == 'NUMBER':
+                    sym = 'n'
+                else:
+                    sym = 'X'
                 print('[{}]'.format(sym), end='')
             print()
