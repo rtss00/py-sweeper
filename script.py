@@ -4,13 +4,10 @@ import os
 
 # os.system('cls' if os.name == 'nt' else 'clear')
 mf = MinedField(10, 10, 12)
-# mf.print_solved_field()
 mf.print_field()
-print(fg(34) + "\nMines in positions:" + fg.rs, end=' ')
-mf.mines.sort()
-for i in mf.mines:
-    print(i, end=' ')
-print()
+print('----------------------------------')
+mf.print_solved_field()
+
 
 x = ''
 while x != 'q':
@@ -21,6 +18,7 @@ while x != 'q':
         mf.open_cell(x, y)
         os.system('cls' if os.name == 'nt' else 'clear')
         mf.print_field()
+        print('----------------------------------')
         mf.print_solved_field()
 # print('Full field list:')
 # count = 0

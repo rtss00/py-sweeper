@@ -42,3 +42,4 @@ class Element:
         else:
             self.type = 'EMPTY'
             self.graphic = ' '
+
