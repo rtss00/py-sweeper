@@ -2,9 +2,8 @@ from field_class import MinedField
 from sty import fg  # , bg, ef, rs
 import os
 
-# os.system('cls' if os.name == 'nt' else 'clear')
+os.system('cls' if os.name == 'nt' else 'clear')
 mf = MinedField(10, 10, 12)
-# mf.print_solved_field()
 mf.print_field()
 print(fg(34) + "\nMines in positions:" + fg.rs, end=' ')
 mf.mines.sort()
@@ -22,8 +21,3 @@ while x != 'q':
         os.system('cls' if os.name == 'nt' else 'clear')
         mf.print_field()
         mf.print_solved_field()
-# print('Full field list:')
-# count = 0
-# for i in mf.field:
-#    print("{}: {}, {} bombs nearby".format(count, i.type, mf.count_bombs()));
-#    count += 1

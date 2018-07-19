@@ -4,17 +4,6 @@ from sty import fg  # bg, ef, rs
 
 
 class MinedField:
-    color_dic = {
-        1: 21,
-        2: 2,
-        3: 1,
-        4: 19,
-        5: 52,
-        6: 14,
-        7: 5,
-        8: 11
-    }
-
     def __init__(self, a, b, amount):
         self.side = a
         self.height = b
@@ -29,7 +18,7 @@ class MinedField:
             self.field.append(elem)
         self.calculate_numbers()
 
-    def t_pos(self, x: int, y: int) -> int:  #translate_position
+    def t_pos(self, x: int, y: int) -> int:  # translate_position
         if (x <= self.side) and (y <= self.height):
             return self.side*(y-1)+(x-1)
         else:
