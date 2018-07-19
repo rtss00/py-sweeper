@@ -1,26 +1,27 @@
 from field_class import MinedField
 from sty import fg  # , bg, ef, rs
+import os
 
-
+# os.system('cls' if os.name == 'nt' else 'clear')
 mf = MinedField(10, 10, 12)
-mf.print_solved_field()
-
+# mf.print_solved_field()
+mf.print_field()
 print(fg(34) + "\nMines in positions:" + fg.rs, end=' ')
 mf.mines.sort()
 for i in mf.mines:
     print(i, end=' ')
 print()
 
-inp = ''
-while inp != 'q':
-    inp = input('Enter position X')
-    if inp != 'q':
-        inp = int(inp)
+x = ''
+while x != 'q':
+    x = input('Enter position X')
+    if x != 'q':
+        x = int(x)
         y = int(input("Enter position Y"))
-        print("Position given: {}".format(mf.translate_position(inp, y)))
-        for cell in mf.get_neighbours(inp, y):
-            print('{},'.format(cell), end=' ')
-        print()
+        mf.open_cell(x, y)
+        os.system('cls' if os.name == 'nt' else 'clear')
+        mf.print_field()
+        mf.print_solved_field()
 # print('Full field list:')
 # count = 0
 # for i in mf.field:
