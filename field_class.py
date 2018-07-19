@@ -17,6 +17,7 @@ class MinedField:
                 elem = Element('EMPTY')
             self.field.append(elem)
         self.calculate_numbers()
+        self.to_open = a * b - amount
 
     def t_pos(self, x: int, y: int) -> int:  # translate_position
         if (x <= self.side) and (y <= self.height):
@@ -54,9 +55,15 @@ class MinedField:
     def open_cell(self, x: int, y: int):
         point = self.field[self.t_pos(x, y)]
         if (point.type == 'NUMBER') or (point.type == 'BOMB'):
+            if not point.opened:
+                self.to_open -= 1
             point.open()
+            print('opened ({},{}), left {}'.format(x, y, str(self.to_open)))
         elif (point.type == 'EMPTY') and (not point.opened) and (not point.flagged):
+            if not point.opened:
+                self.to_open -= 1
             point.open()
+            print('opened ({},{}), left {}'.format(x, y, str(self.to_open)))
             neighbours = self.get_neighbours(x, y)
             for cell in neighbours:
                 new_x = cell % self.side + 1
