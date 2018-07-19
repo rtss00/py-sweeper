@@ -53,7 +53,15 @@ class MinedField:
 
     def open_cell(self, x: int, y: int):
         point = self.field[self.t_pos(x, y)]
-        point.open()
+        if (point.type == 'NUMBER') or (point.type == 'BOMB'):
+            point.open()
+        elif (point.type == 'EMPTY') and (not point.opened):
+            point.open()
+            neighbours = self.get_neighbours(x, y)
+            for cell in neighbours:
+                new_x = cell % self.side + 1
+                new_y = ((cell - (new_x - 1)) // self.side) + 1
+                self.open_cell(new_x, new_y)
 
     def check_type(self, x: int, y: int) -> str:
         if (1 <= y <= self.height-1) and (1 <= x <= self.side):
