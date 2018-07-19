@@ -1,6 +1,6 @@
 import func
 from element_class import Element
-from sty import fg, bg, ef, rs
+from sty import fg  # bg, ef, rs
 
 
 class MinedField:
@@ -56,26 +56,27 @@ class MinedField:
         else:
             return 'EMPTY'
 
-    def check_type_no_t(self, pos: int) -> str:
-        if 0 <= pos < self.side*self.height:
-            return self.field[pos].type;
-        else:
-            return 'EMPTY'
-
-    def count_bombs(self, pos: int) -> int:
+    def count_bombs(self, x: int, y: int) -> int:
         count = 0
-        for i in [-1, 0, 1]:
-            for j in [-self.side, 0 , self.side]:
-                new_pos = pos + i + j
-                if (0 <= new_pos < self.side*self.height) and (self.check_type_no_t(new_pos) == 'BOMB'):
-                    count += 1
+        for pos in self.get_neighbours(x, y):
+            if self.field[pos].type == 'BOMB':
+                count += 1
         return count
+
+    def get_neighbours(self, x: int, y: int) -> list:
+        ret = []
+        for i in [-1, 0, 1]:
+            for j in [-1, 0, 1]:
+                if (1 <= x+i <= self.side) and (1 <= y+j <= self.side):
+                    new_pos = self.translate_position(x+i, y+j)
+                    ret.append(new_pos)
+        return ret
 
     def calculate_numbers(self):
         for y in range(1, self.height+1):
             for x in range(1, self.side+1):
                 point = self.field[self.translate_position(x, y)]
-                number = self.count_bombs(self.translate_position(x, y))
+                number = self.count_bombs(x, y)
                 if (point.type != 'BOMB') and (number > 0):
                     point.type = 'NUMBER'
                     point.number = number
