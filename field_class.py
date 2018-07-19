@@ -40,10 +40,8 @@ class MinedField:
             for x in range(1, self.side+1):
                 point = self.field[self.t_pos(x, y)]
                 sym = point.graphic
-                if point.type == 'NUMBER':
-                    text = '[' + fg(self.color_dic[int(sym)]) + sym + fg.rs + ']'
-                else:
-                    text = '[{}]'.format(sym)
+
+                text = '[{}]'.format(sym)
                 print(text, end='')
             print()
 
