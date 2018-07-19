@@ -35,20 +35,24 @@ class MinedField:
         else:
             return -1
 
+    def print_solved_field(self):
+        for y in range(1, self.height+1):
+            for x in range(1, self.side+1):
+                point = self.field[self.translate_position(x, y)]
+                sym = point.graphic
+                if point.type == 'NUMBER':
+                    text = '[' + fg(self.color_dic[int(sym)]) + sym + fg.rs + ']'
+                else:
+                    text = '[{}]'.format(sym)
+                print(text, end='')
+            print()
+
     def print_field(self):
         for y in range(1, self.height+1):
             for x in range(1, self.side+1):
                 point = self.field[self.translate_position(x, y)]
-                if point.type == 'EMPTY':
-                    sym = ' '
-                elif point.type == 'NUMBER':
-                    sym = str(point.number)
-                else:
-                    sym = 'X'
-                text = '[' + fg(self.color_dic[int(sym)]) + sym + fg.rs + ']' if point.type == 'NUMBER' \
-                    else '[{}]'.format(sym)
-                print(text, end='')
-            print()
+                if point.open:
+                    pass
 
     def check_type(self, x: int, y: int) -> str:
         if (1 <= y <= self.height-1) and (1 <= x <= self.side):
@@ -78,5 +82,4 @@ class MinedField:
                 point = self.field[self.translate_position(x, y)]
                 number = self.count_bombs(x, y)
                 if (point.type != 'BOMB') and (number > 0):
-                    point.type = 'NUMBER'
-                    point.number = number
+                    point.change_type('NUMBER', number)
