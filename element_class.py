@@ -26,7 +26,7 @@ class Element:
 
     def flag(self):
         # only flag if it's un-flagged or not open.
-        self.flagged = True if (not self.flagged) and (not self.open) else False
+        self.flagged = True if (not self.flagged) and (not self.opened) else False
 
     def open(self):
         # only open if it's not flagged

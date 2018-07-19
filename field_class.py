@@ -55,7 +55,7 @@ class MinedField:
         point = self.field[self.t_pos(x, y)]
         if (point.type == 'NUMBER') or (point.type == 'BOMB'):
             point.open()
-        elif (point.type == 'EMPTY') and (not point.opened):
+        elif (point.type == 'EMPTY') and (not point.opened) and (not point.flagged):
             point.open()
             neighbours = self.get_neighbours(x, y)
             for cell in neighbours:
