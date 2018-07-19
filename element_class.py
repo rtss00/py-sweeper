@@ -6,5 +6,5 @@ class Element:
             self.type = elem_type
         else:
             self.type = 'EMPTY'
-        self.flagged = False
-
+        self.state = 'NONE'
+        self.number = 0
