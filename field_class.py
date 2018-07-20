@@ -18,12 +18,18 @@ class MinedField:
             self.field.append(elem)
         self.calculate_numbers()
         self.to_open = a * b - amount
+        self.explode = False
 
-    def t_pos(self, x: int, y: int) -> int:  # translate_position
+    def t_pos(self, x: int, y: int) -> int:  # translate_position from 1-indexed two-dimensional position
         if (x <= self.side) and (y <= self.height):
             return self.side*(y-1)+(x-1)
         else:
             return -1
+
+    def t_pos_rev(self, pos: int):  # translate position from 0-indexed one-dimensional position in list
+        lst = list([pos % self.side + 1])
+        lst.append(((pos - (lst[0] - 1)) // self.side) + 1)
+        return lst
 
     def print_solved_field(self):
         for y in range(1, self.height+1):
@@ -54,21 +60,39 @@ class MinedField:
 
     def open_cell(self, x: int, y: int):
         point = self.field[self.t_pos(x, y)]
-        if (point.type == 'NUMBER') or (point.type == 'BOMB'):
-            if not point.opened:
-                self.to_open -= 1
+
+        if (point.type == 'NUMBER') and (not point.opened):
+            self.to_open -= 1
+            print("reducing var on ({},{})".format(x, y))
             point.open()
-            print('opened ({},{}), left {}'.format(x, y, str(self.to_open)))
+            self.explode = True
+        elif (point.type == 'NUMBER') and point.opened:
+            # when we try to open a number with it's neighbour bombs flagged (and only this ones), the action
+            # opens every neighbour cell except for the flagged ones. This is a common feature in
+            # most minesweeper games
+            neighbours = self.get_neighbours(x, y)
+            flag_count = 0
+            bomb_total = point.number
+            for cell in neighbours:
+                if self.field[cell].flagged:
+                    flag_count += 1
+            if flag_count == bomb_total:
+                for cell in neighbours:
+                    if not self.field[cell].opened:
+                        new_pos = self.t_pos_rev(cell)
+                        self.open_cell(new_pos[0], new_pos[1])
+
         elif (point.type == 'EMPTY') and (not point.opened) and (not point.flagged):
-            if not point.opened:
-                self.to_open -= 1
+            self.to_open -= 1
+            print("reducing var on ({},{})".format(x, y))
             point.open()
-            print('opened ({},{}), left {}'.format(x, y, str(self.to_open)))
             neighbours = self.get_neighbours(x, y)
             for cell in neighbours:
                 new_x = cell % self.side + 1
                 new_y = ((cell - (new_x - 1)) // self.side) + 1
                 self.open_cell(new_x, new_y)
+        elif point.type == 'BOMB':
+            point.open()
 
     def check_type(self, x: int, y: int) -> str:
         if (1 <= y <= self.height-1) and (1 <= x <= self.side):
@@ -79,7 +103,7 @@ class MinedField:
     def count_bombs(self, x: int, y: int) -> int:
         count = 0
         for pos in self.get_neighbours(x, y):
-            if self.field[pos].type == 'BOMB':
+            if (self.field[pos].type == 'BOMB') and (not self.field[pos].flagged):
                 count += 1
         return count
 
