@@ -47,9 +47,6 @@ class View:
         self.render_heading()
         self.render_field(self.mf)
 
-        box(self.head_win)
-        box(self.game_win)
-
         update_panels()
         doupdate()
 
