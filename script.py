@@ -1,9 +1,5 @@
-from field_class import MinedField
 from unicurses import *
 from interface import View
-# from element_class import Element
-# from sty import fg, bg, ef, rs
-import os
 
 
 def main():

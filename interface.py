@@ -1,7 +1,10 @@
 from unicurses import *
 from field_class import MinedField
 
-
+'''
+This constants control where the game and heading windows will be created, as well as the maximum
+sizes allowed for the mined field. 
+'''
 HEAD_WIN_Y = 0
 HEAD_WIN_X = 0
 GAME_WIN_Y = HEAD_WIN_Y + 9
@@ -12,7 +15,7 @@ MAX_COLS = 16
 
 
 class View:
-    color_dic = {
+    color_dic = {  # This converts the number of a cell to an 8-bit color code.
         1: 21,
         2: 2,
         3: 1,
@@ -23,7 +26,14 @@ class View:
         8: 11
     }
 
-    def __init__(self, side, height, bombs):
+    def __init__(self, side: int, height: int, bombs: int):
+        """
+        Initialize settings, create two panels for the heading and game areas, and create a field in the game
+        area. The creation of a field inside this function is a temporary feature.
+        :param side: Side length of field
+        :param height: Height length of field
+        :param bombs: Amount of bombs in field
+        """
         self.standard_screen = initscr()
         noecho()
         cbreak()
@@ -50,7 +60,12 @@ class View:
         update_panels()
         doupdate()
 
-    def render_heading(self):
+    def render_heading(self) -> None:
+        """
+        Render the heading of the game in the heading area.
+        Note that doupdate() will not be called at the end of this function.
+        :return:
+        """
         head = [" ___      ___                                +-------------------------------------------+\n"
                 " | _ \_  _/ __|_ __ _____ ___ _ __  ___ _ _   | Use the arrow keys to move the cursor     |\n"
                 " |  _/ || \__ \ V  V / -_) -_) '_ \/ -_) '_|  | Press F to flag a cell or space to open it|\n"
@@ -61,8 +76,15 @@ class View:
 
         for i in range(0, head.__len__()):
             mvwaddstr(self.head_win, i+1, 1, head[i])
+        update_panels()
 
-    def render_field(self, mf):
+    def render_field(self, mf: MinedField) -> None:
+        """
+        Render the field here in the game area.
+        Note that doupdate() will not be called at the end of this function.
+        :param mf:
+        :return:
+        """
         position = getyx(self.game_win)
         field_str = ''
         for y in range(1, mf.height + 1):
@@ -82,15 +104,26 @@ class View:
                 mvwaddstr(self.game_win, y, x*3-1, field_str, color_pair(point.number) if point.opened else 'NO_USE')
                 mvwaddstr(self.game_win, y, x*3, ']')
         wmove(self.game_win, position[0], position[1])
+        update_panels()
 
-    def finish_view(self):
+    def finish_view(self) -> None:
+        """
+        Reverts the changes made to the terminal and exits the interface.
+        :return:
+        """
         echo()
         nocbreak()
         keypad(self.standard_screen, False)
 
         endwin()
 
-    def process_key_input(self, key):
+    def process_key_input(self, key: int) -> int:
+        """
+        Key processor for the game area. Given the integer key code provided, will call appropriate functions.
+        Note: You will need the keypad function set to True.
+        :param key: Integer key code.
+        :return: Integer with action information: 0-Exit, 1-Valid action, 2-Unrecognized key
+        """
         pos = getyx(self.game_win)
         if (key == ord('q')) or (key == ord('Q')):
             return 0
@@ -125,12 +158,17 @@ class View:
         else:
             return 2
 
-    def write(self, string):
+    def write(self, string: str) -> None:
         pos = getyx(self.game_win)
         mvwaddstr(self.game_win, 0, 0, string, A_BOLD)
         wmove(self.game_win, pos[0], pos[1])
 
-    def key_action(self, action):
+    def key_action(self, action: str) -> None:
+        """
+        Open or flag cells in the current cursor position.
+        :param action: String indicating the required action: OPEN or FLAG
+        :return:
+        """
         pos = getyx(self.game_win)
         y = pos[0]
         x = (pos[1] + 1) // 3
@@ -140,6 +178,5 @@ class View:
         elif action == 'FLAG':
             self.mf.flag_cell(x, y)
             self.render_field(self.mf)
-        update_panels()
         doupdate()
 
