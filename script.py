@@ -9,7 +9,6 @@ mf.print_field()
 print('TO OPEN: {}   ---------------------'.format(mf.to_open))
 mf.print_solved_field()
 
-
 x = ''
 point = Element
 while x != 'q' and mf.to_open != 0:

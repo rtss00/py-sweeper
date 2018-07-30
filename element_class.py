@@ -36,6 +36,7 @@ class Element:
         if _type == 'BOMB':
             self.type = 'BOMB'
             self.graphic = 'X'
+            self.number = number
         elif _type == 'NUMBER':
             self.type = 'NUMBER'
             self.graphic = fg(self.color_dic[number]) + str(number) + fg.rs
@@ -43,4 +44,6 @@ class Element:
         else:
             self.type = 'EMPTY'
             self.graphic = ' '
+            self.number = number
+
 
