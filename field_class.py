@@ -192,3 +192,25 @@ class MinedField:
                 number = self.count_bombs(x, y)
                 if (point.type != 'BOMB') and (number > 0):
                     point.change_type('NUMBER', number)
+
+    def get_field(self):
+        """
+        Returns a multi-line field_str containing the current field (not colored).
+        :return:
+        """
+        field_str = ''
+        for y in range(1, self.height+1):
+            for x in range(1, self.side+1):
+                pos = self.t_pos(x, y)
+                point = self.field[pos]
+                if point.opened:
+                    if point.type == 'NUMBER':
+                        field_str += '[{}]'.format(point.number)
+                    elif point.type == 'EMPTY':
+                        field_str += '[ ]'
+                    elif point.type == 'BOMB':
+                        field_str += '[*]'
+                else:
+                    field_str += '[F]' if point.flagged else '[?]'
+            field_str += "\n"
+        return field_str
