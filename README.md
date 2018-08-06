@@ -6,7 +6,7 @@ This was quite a nice little challenge. Hope you have fun with it.
 
 ## Requirements
 The game requires the UniCurses library to work with the terminal. You can download it from the [Python Package Index](https://pypi.org/project/UniCurses/). No need to install it, just make sure the unicurses.py file is in the same directory from where you're running everything.  
-Also, you should include feluxe's [sty](https://github.com/feluxe/sty) package in the same directory. It was used for a previous version of the game, and will be removed soon.
+Also, you should include feluxe's [sty](https://github.com/feluxe/sty) package in the same directory **ONLY** if you're curious and are working with previous versions of the game for some reason. It was used for a previous version of the game, and removed since then.
 
 ## How to play?
 Up to now, the size of the field and the amount of mines is fixed, but this should be updated soon.
