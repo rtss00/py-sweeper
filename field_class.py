@@ -1,6 +1,6 @@
 import func
-from element_class import Element
-from sty import fg  # bg, ef, rs
+from element_class import Cell
+# from sty import fg  # bg, ef, rs
 
 
 class MinedField:
@@ -12,9 +12,9 @@ class MinedField:
         self.field = []
         for i in range(0, a*b):  # a*b is out of range in the list, but range() doesn't include it.
             if i in self.mines:
-                elem = Element('BOMB')
+                elem = Cell('BOMB')
             else:
-                elem = Element('EMPTY')
+                elem = Cell('EMPTY')
             self.field.append(elem)
         self.calculate_numbers()
         self.to_open = a * b - amount
@@ -69,7 +69,9 @@ class MinedField:
                 if point.opened:
                     sym = point.graphic
                 elif point.flagged:
-                    sym = fg(8) + 'F' + fg.rs
+                    # Color for previous versions
+                    # sym = fg(8) + 'F' + fg.rs
+                    sym = 'F'
                 else:
                     sym = '?'
                 print("[{}]".format(sym), end='')

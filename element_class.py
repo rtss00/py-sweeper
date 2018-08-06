@@ -1,7 +1,7 @@
-from sty import fg
+# from sty import fg
 
 
-class Element:
+class Cell:
     types = ('BOMB', 'EMPTY', 'NUMBER')
     color_dic = {
         1: 21,
@@ -39,7 +39,9 @@ class Element:
             self.number = number
         elif _type == 'NUMBER':
             self.type = 'NUMBER'
-            self.graphic = fg(self.color_dic[number]) + str(number) + fg.rs
+            # Color for previous versions
+            # self.graphic = fg(self.color_dic[number]) + str(number) + fg.rs
+            self.graphic = str(number)
             self.number = number
         else:
             self.type = 'EMPTY'
