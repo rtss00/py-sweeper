@@ -13,6 +13,9 @@ GAME_WIN_X = 0
 MAX_LINE = 16
 MAX_COLS = 16
 
+MENU_WIN_Y = GAME_WIN_Y
+MENU_WIN_X = MAX_COLS*3 + 5
+
 
 class View:
     color_dic = {  # This converts the number of a cell to an 8-bit color code.
@@ -46,9 +49,18 @@ class View:
         # Creation of heading and game windows and panels inside the standard screen
         self.head_win = newwin(9, 100, HEAD_WIN_Y, HEAD_WIN_X)
         self.game_win = newwin(MAX_LINE + 2, MAX_COLS*3 + 2, GAME_WIN_Y, GAME_WIN_X)
+        self.menu_win = newwin(height + 2, 13, MENU_WIN_Y, MENU_WIN_X)
         self.head_pan = new_panel(self.head_win)
         self.game_pan = new_panel(self.game_win)
+        self.menu_pan = new_panel(self.game_win)
+
+        self.menu_options = ['START GAME!', 'SETTINGS', 'ABOUT', 'EXIT']
+        self.size = self.menu_options.__len__()
+        self.select = 1
+        self.in_menu = False
+
         keypad(self.game_win, True)
+        keypad(self.menu_win, True)
 
         wmove(self.game_win, 1, 2)
 
@@ -56,6 +68,7 @@ class View:
 
         self.render_heading()
         self.render_field(self.mf)
+        self.render_menu(self.select)
 
         update_panels()
         doupdate()
@@ -106,6 +119,21 @@ class View:
         wmove(self.game_win, position[0], position[1])
         update_panels()
 
+    def render_menu(self, option):
+        position = getyx(self.game_win)
+        x = y = 1
+        # box(self.menu_win)
+        for i in range(0, self.size):  # Because of this statement the EXIT option MUST be at the end.
+            if option == i+1:
+                mvwaddstr(self.menu_win, y, x, self.menu_options[i], A_REVERSE)
+            else:
+                mvwaddstr(self.menu_win, y, x, self.menu_options[i])
+            y = MAX_LINE if i == self.size-2 else y+2
+
+        wrefresh(self.menu_win)
+        wmove(self.game_win, position[0], position[1])
+        update_panels()
+
     def finish_view(self) -> None:
         """
         Reverts the changes made to the terminal and exits the interface.
@@ -128,21 +156,46 @@ class View:
         if (key == ord('q')) or (key == ord('Q')):
             return 0
         elif key == KEY_UP and (pos[0] > 1):
-            wmove(self.game_win, pos[0]-1, pos[1])
-            self.write('UP   ')
+            if (pos[0] > 1) and not self.in_menu:
+                wmove(self.game_win, pos[0]-1, pos[1])
+                self.write('UP   ')
+            elif self.in_menu:
+                self.select = self.size if self.select == 1 else self.select - 1
+                self.render_menu(self.select)
             return 1
-        elif key == KEY_DOWN and (pos[0] < self.mf.height):
-            wmove(self.game_win, pos[0]+1, pos[1])
-            self.write('DOWN ')
+
+        elif key == KEY_DOWN:
+
+            if pos[0] < self.mf.height and not self.in_menu:
+                wmove(self.game_win, pos[0]+1, pos[1])
+                self.write('DOWN ')
+            elif self.in_menu:
+                self.select = 1 if self.select == self.size else self.select + 1
+                self.render_menu(self.select)
             return 1
-        elif key == KEY_LEFT and (pos[1] > 2):
-            wmove(self.game_win, pos[0], pos[1]-3)
-            self.write('LEFT ')
+
+        elif key == KEY_LEFT:
+
+            if pos[1] > 2 and not self.in_menu:
+                wmove(self.game_win, pos[0], pos[1]-3)
+                self.write('LEFT ')
+            elif self.in_menu:
+                curs_set(True)
+                # wmove(self.game_win, 1, self.mf.side*3-1)
+                self.in_menu = False
             return 1
-        elif key == KEY_RIGHT and (pos[1] < self.mf.side*3-2):
-            wmove(self.game_win, pos[0], pos[1]+3)
-            self.write('RIGHT')
+
+        elif key == KEY_RIGHT:
+
+            if pos[1] < self.mf.side*3-2:
+                wmove(self.game_win, pos[0], pos[1]+3)
+                self.write('RIGHT')
+            elif not self.in_menu:
+                curs_set(False)
+                self.in_menu = True
+                self.render_menu(self.select)
             return 1
+
         elif key == ord(' '):
             self.key_action('OPEN')
             self.write('OPEN ')

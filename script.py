@@ -3,7 +3,7 @@ from interface import View
 
 
 def main():
-    view = View(10, 10, 12)
+    view = View(16, 16, 12)
     while True:
         if view.process_key_input(wgetch(view.game_win)) == 0:
             break

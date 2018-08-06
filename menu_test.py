@@ -1,56 +1,57 @@
 from unicurses import *
 
 
-choices = ['Start game', 'Settings', 'About', 'Exit']
+choices = ['Start Game', 'Settings', 'About', 'Exit']
+
+selected = 1
+size = choices.__len__()
 
 
-def print_menu(window, selected):
-    x = y = 2
+def render_menu(window, opt, select):
+    x = y = 1
     box(window)
-    for position in range(0, choices.__len__()):
-        if selected == position+1:  # We must add one to the position to get a 1-indexed choice list
-            mvwaddstr(window, y, x, choices[position], A_REVERSE)
+    for i in range(0, size):
+        if i+1 == select:
+            mvwaddstr(window, y, x, opt[i], A_REVERSE)
         else:
-            mvwaddstr(window, y, x, choices[position])
+            mvwaddstr(window, y, x, opt[i])
         y += 1
-    update_panels()  # Note that the window must be converted into a panel for this o work
     wrefresh(window)
+    update_panels()
 
 
 screen = initscr()
 clear()
 noecho()
-curs_set(False)
 cbreak()
+curs_set(False)
 
-menu_window = newwin(10, 20, 0, 0)
+menu = newwin(10, 20, 0, 0)
 keypad(screen, True)
-new_panel(menu_window)
-refresh()
-
-cursor = 1
-size = choices.__len__()
-
-print_menu(menu_window, cursor)
-doupdate()
+render_menu(menu, choices, selected)
+wrefresh(menu)
 
 while True:
     key = getch()
 
     if key == KEY_UP:
-        cursor = size if cursor == 1 else cursor-1
-    elif key == KEY_DOWN:
-        cursor = 1 if cursor == size else cursor+1
-    elif key == 10:
-        if choices[cursor-1] == 'Exit':
-            break
-        mvwaddstr(screen, 20, 0, 'Selected: {}'.format(choices[cursor]))
+        selected = size if selected == 1 else selected-1
+        mvwaddstr(screen, 15, 0, 'Selected: {}'.format(selected))
         clrtoeol()
-        wrefresh(menu_window)
-    print_menu(menu_window, cursor)
-    doupdate()
 
-clear()
+    elif key == KEY_DOWN:
+        selected = 1 if selected == size else selected+1
+        mvwaddstr(screen, 15, 0, 'Selected: {}'.format(selected))
+        clrtoeol()
+
+    elif key == 10:
+        mvwaddstr(screen, 15, 0, 'Option: {}'.format(choices[selected-1]))
+        clrtoeol()
+        if choices[selected-1] == 'Exit':
+            break
+
+    render_menu(menu, choices, selected)
+
 echo()
 nocbreak()
 curs_set(True)
