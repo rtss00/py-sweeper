@@ -132,7 +132,6 @@ class View:
 
         wrefresh(self.menu_win)
         wmove(self.game_win, position[0], position[1])
-        update_panels()
 
     def finish_view(self) -> None:
         """
@@ -196,12 +195,18 @@ class View:
                 self.render_menu(self.select)
             return 1
 
-        elif key == ord(' '):
-            self.key_action('OPEN')
-            self.write('OPEN ')
-            return 1
+        elif (key == ord(' ')) or (key == 10):
+
+            if self.in_menu:
+                self.write('MENU*')
+                return self.key_action_menu(self.menu_options[self.select-1])
+
+            else:
+                self.write('OPEN ')
+                return self.key_action_field('OPEN')
+
         elif (key == ord('f')) or (key == ord('F')):
-            self.key_action('FLAG')
+            self.key_action_field('FLAG')
             self.write('FLAG ')
             return 1
         elif (key == ord('m')) or (key == ord('M')):
@@ -211,12 +216,14 @@ class View:
         else:
             return 2
 
-    def write(self, string: str) -> None:
+    def write(self, string: str, y=0, x=0) -> None:
         pos = getyx(self.game_win)
-        mvwaddstr(self.game_win, 0, 0, string, A_BOLD)
+        mvwaddstr(self.game_win, y, x, string, A_BOLD)
+
+        clrtoeol()
         wmove(self.game_win, pos[0], pos[1])
 
-    def key_action(self, action: str) -> None:
+    def key_action_field(self, action: str) -> int:
         """
         Open or flag cells in the current cursor position.
         :param action: String indicating the required action: OPEN or FLAG
@@ -225,6 +232,7 @@ class View:
         pos = getyx(self.game_win)
         y = pos[0]
         x = (pos[1] + 1) // 3
+
         if action == 'OPEN':
             self.mf.open_cell(x, y)
             self.render_field(self.mf)
@@ -232,4 +240,16 @@ class View:
             self.mf.flag_cell(x, y)
             self.render_field(self.mf)
         doupdate()
+        return 1
+
+    def key_action_menu(self, action: str) -> int:
+        if action == 'START GAME!':
+            pass
+        elif action == 'SETTINGS':
+            pass
+        elif action == 'ABOUT':
+            pass
+        elif action == 'EXIT':
+            return 0
+
 
