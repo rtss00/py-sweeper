@@ -9,7 +9,7 @@ sizes allowed for the mined field.
 '''
 HEAD_WIN_Y = 0
 HEAD_WIN_X = 0
-GAME_WIN_Y = HEAD_WIN_Y + 9
+GAME_WIN_Y = HEAD_WIN_Y + 6
 GAME_WIN_X = 0
 
 MAX_LINE = 16
@@ -39,6 +39,11 @@ class View:
         :param height: Height length of field
         :param bombs: Amount of bombs in field
         """
+
+        self.side = side
+        self.height = height
+        self.bombs = bombs
+
         self.standard_screen = initscr()
         noecho()
         cbreak()
@@ -49,7 +54,7 @@ class View:
             init_pair(i, self.color_dic[i], COLOR_BLACK)
 
         # Creation of heading and game windows and panels inside the standard screen
-        self.head_win = newwin(9, 100, HEAD_WIN_Y, HEAD_WIN_X)
+        self.head_win = newwin(7, 100, HEAD_WIN_Y, HEAD_WIN_X)
         self.game_win = newwin(MAX_LINE + 2, MAX_COLS*3 + 2, GAME_WIN_Y, GAME_WIN_X)
         self.menu_win = newwin(height + 2, 38, MENU_WIN_Y, MENU_WIN_X)
         # self.side_win = newwin()
@@ -94,16 +99,15 @@ class View:
         Note that doupdate() will not be called at the end of this function.
         :return:
         """
-        head = [" ___      ___                                +-------------------------------------------+\n"
-                " | _ \_  _/ __|_ __ _____ ___ _ __  ___ _ _   | Use the arrow keys to move the cursor     |\n"
-                " |  _/ || \__ \ V  V / -_) -_) '_ \/ -_) '_|  | Press F to flag a cell or space to open it|\n"
-                " |_|  \_, |___/\_/\_/\___\___| .__/\___|_|    | Press M to return to the main menu        |\n"
-                "      |__/                   |_|              | Press Q to quit the game                  |\n"
-                "                                              +-------------------------------------------+\n"
+        head = [" ___      ___                                \n"
+                " | _ \_  _/ __|_ __ _____ ___ _ __  ___ _ _   | Use the arrow keys to move the cursor     \n"
+                " |  _/ || \__ \ V  V / -_) -_) '_ \/ -_) '_|  | Press F to flag a cell or space to open it\n"
+                " |_|  \_, |___/\_/\_/\___\___| .__/\___|_|    | Press M to return to the main menu        \n"
+                "      |__/                   |_|              | Press Q to quit the game                  \n"
                 ]
 
         for i in range(0, head.__len__()):
-            mvwaddstr(self.head_win, i+1, 1, head[i])
+            mvwaddstr(self.head_win, i, 1, head[i])
         update_panels()
 
     def render_field(self, mf: MinedField) -> None:
@@ -137,17 +141,23 @@ class View:
     def render_menu(self, arr, option, no_reverse=False):
         wclear(self.menu_win)
         position = getyx(self.game_win)
+        wattron(self.menu_win, A_BOLD)
         size = arr.__len__()
         y = 1
         # box(self.menu_win)
         for i in range(0, size):  # Because of this statement the EXIT option MUST be at the end.
             x = (getmaxyx(self.menu_win)[1] - arr[i].__len__() - 1) // 2
             if option == i+1 and not no_reverse:
-                mvwaddstr(self.menu_win, y, x, arr[i], A_REVERSE)
+                wattron(self.menu_win, A_REVERSE)
+                mvwaddstr(self.menu_win, y, x, arr[i])
+                wattroff(self.menu_win, A_REVERSE)
+
             else:
                 mvwaddstr(self.menu_win, y, x, arr[i])
             y = MAX_LINE if i == arr.__len__()-2 else y+2
 
+        wattroff(self.menu_win, A_BOLD)
+        box(self.menu_win)
         wrefresh(self.menu_win)
         wmove(self.game_win, position[0], position[1])
 
@@ -291,11 +301,19 @@ class View:
             if action == 'APPLY':
                 pass
 
-            if action == '<< BACK <<':
+            elif action == self.menus[2][0]:
+                # new_side = get_number_menu()
+                x = self.get_number_menu(1)
+                self.write(str(x))
+                self.finish_view()
+                print(str(x))
+                input()
+                return 0
+
+            elif action == '<< BACK <<':
                 self.in_menu = 1
                 self.select = 1
                 self.render_menu(self.menus[1], 1)
-                pass
 
         elif self.in_menu == 3:  # About menu
             if action == 'github.com/rtss00/py-sweeper':
@@ -306,3 +324,25 @@ class View:
                 self.select = 1
                 self.render_menu(self.menus[1], 1)
 
+    def get_number_menu(self, option):
+        current_pos = getyx(self.game_win)
+
+        base_position = (getmaxyx(self.menu_win)[1] - self.menus[2][option].__len__() - 1) // 2
+        offset = self.menus[2][option].__len__() - 3
+        x = base_position + offset
+
+        wmove(self.menu_win, 1, x)
+
+        echo()
+        curs_set(True)
+        first = getch()
+        second = getch()
+        noecho()
+        curs_set(False)
+
+        wmove(self.game_win, current_pos[0], current_pos[1])
+
+        try:
+            return int(chr(first) + chr(second))
+        except ValueError:
+            return 1
