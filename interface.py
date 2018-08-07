@@ -1,3 +1,5 @@
+import webbrowser
+
 from unicurses import *
 from field_class import MinedField
 
@@ -49,15 +51,27 @@ class View:
         # Creation of heading and game windows and panels inside the standard screen
         self.head_win = newwin(9, 100, HEAD_WIN_Y, HEAD_WIN_X)
         self.game_win = newwin(MAX_LINE + 2, MAX_COLS*3 + 2, GAME_WIN_Y, GAME_WIN_X)
-        self.menu_win = newwin(height + 2, 13, MENU_WIN_Y, MENU_WIN_X)
+        self.menu_win = newwin(height + 2, 38, MENU_WIN_Y, MENU_WIN_X)
+        # self.side_win = newwin()
+
         self.head_pan = new_panel(self.head_win)
         self.game_pan = new_panel(self.game_win)
         self.menu_pan = new_panel(self.game_win)
 
-        self.menu_options = ['START GAME!', 'SETTINGS', 'ABOUT', 'EXIT']
-        self.size = self.menu_options.__len__()
+        self.main_menu = ['START GAME!', 'SETTINGS', 'ABOUT', 'EXIT']
+        self.about = ['Py-Sweeper.',
+                      'Minesweeper implemented in Python3',
+                      'Check GitHub for more info:',
+                      'github.com/rtss00/py-sweeper',
+                      '2018',
+                      '<< BACK <<'
+                      ]
+        self.settings = ['SIDE: [  ]', 'HEIGHT: [  ]', 'BOMBS: [  ]', 'APPLY', '<< BACK <<']
+
+        self.menus = [None, self.main_menu, self.settings, self.about]
+
         self.select = 1
-        self.in_menu = False
+        self.in_menu = 0
 
         keypad(self.game_win, True)
         keypad(self.menu_win, True)
@@ -68,8 +82,9 @@ class View:
 
         self.render_heading()
         self.render_field(self.mf)
-        self.render_menu(self.select)
+        self.render_menu(self.main_menu, self.select, True)
 
+        wrefresh(self.menu_win)
         update_panels()
         doupdate()
 
@@ -119,16 +134,19 @@ class View:
         wmove(self.game_win, position[0], position[1])
         update_panels()
 
-    def render_menu(self, option):
+    def render_menu(self, arr, option, no_reverse=False):
+        wclear(self.menu_win)
         position = getyx(self.game_win)
-        x = y = 1
+        size = arr.__len__()
+        y = 1
         # box(self.menu_win)
-        for i in range(0, self.size):  # Because of this statement the EXIT option MUST be at the end.
-            if option == i+1:
-                mvwaddstr(self.menu_win, y, x, self.menu_options[i], A_REVERSE)
+        for i in range(0, size):  # Because of this statement the EXIT option MUST be at the end.
+            x = (getmaxyx(self.menu_win)[1] - arr[i].__len__() - 1) // 2
+            if option == i+1 and not no_reverse:
+                mvwaddstr(self.menu_win, y, x, arr[i], A_REVERSE)
             else:
-                mvwaddstr(self.menu_win, y, x, self.menu_options[i])
-            y = MAX_LINE if i == self.size-2 else y+2
+                mvwaddstr(self.menu_win, y, x, arr[i])
+            y = MAX_LINE if i == arr.__len__()-2 else y+2
 
         wrefresh(self.menu_win)
         wmove(self.game_win, position[0], position[1])
@@ -154,52 +172,55 @@ class View:
         pos = getyx(self.game_win)
         if (key == ord('q')) or (key == ord('Q')):
             return 0
-        elif key == KEY_UP and (pos[0] > 1):
-            if (pos[0] > 1) and not self.in_menu:
+        elif key == KEY_UP:
+            if (pos[0] > 1) and self.in_menu == 0:
                 wmove(self.game_win, pos[0]-1, pos[1])
                 self.write('UP   ')
-            elif self.in_menu:
-                self.select = self.size if self.select == 1 else self.select - 1
-                self.render_menu(self.select)
+            elif self.in_menu != 0:
+                self.select = self.menus[self.in_menu].__len__() if self.select == 1 else self.select - 1
+                self.render_menu(self.menus[self.in_menu], self.select)
+                self.write(self.select)
             return 1
 
         elif key == KEY_DOWN:
 
-            if pos[0] < self.mf.height and not self.in_menu:
+            if pos[0] < self.mf.height and self.in_menu == 0:
                 wmove(self.game_win, pos[0]+1, pos[1])
                 self.write('DOWN ')
-            elif self.in_menu:
-                self.select = 1 if self.select == self.size else self.select + 1
-                self.render_menu(self.select)
+            elif self.in_menu != 0:
+                self.select = 1 if self.select == self.menus[self.in_menu].__len__() else self.select + 1
+                self.render_menu(self.menus[self.in_menu], self.select)
+                self.write(self.select)
             return 1
 
         elif key == KEY_LEFT:
 
-            if pos[1] > 2 and not self.in_menu:
+            if pos[1] > 2 and self.in_menu == 0:
                 wmove(self.game_win, pos[0], pos[1]-3)
                 self.write('LEFT ')
-            elif self.in_menu:
+            elif self.in_menu != 0:
                 curs_set(True)
                 # wmove(self.game_win, 1, self.mf.side*3-1)
-                self.in_menu = False
+                self.in_menu = 0
+                self.render_menu(self.menus[1], self.select, True)
             return 1
 
         elif key == KEY_RIGHT:
 
-            if pos[1] < self.mf.side*3-2:
+            if pos[1] < self.mf.side*3-2 and self.in_menu == 0:
                 wmove(self.game_win, pos[0], pos[1]+3)
                 self.write('RIGHT')
-            elif not self.in_menu:
+            elif self.in_menu == 0:
                 curs_set(False)
-                self.in_menu = True
-                self.render_menu(self.select)
+                self.in_menu = 1
+                self.render_menu(self.menus[self.in_menu], self.select)
             return 1
 
         elif (key == ord(' ')) or (key == 10):
 
             if self.in_menu:
                 self.write('MENU*')
-                return self.key_action_menu(self.menu_options[self.select-1])
+                return self.key_action_menu(self.menus[self.in_menu][self.select - 1])
 
             else:
                 self.write('OPEN ')
@@ -211,7 +232,9 @@ class View:
             return 1
         elif (key == ord('m')) or (key == ord('M')):
             # self.main_menu()
-            self.write('MENU ')
+            self.in_menu = 1
+            curs_set(False)
+            self.render_menu(self.main_menu, 1)
             return 1
         else:
             return 2
@@ -243,13 +266,43 @@ class View:
         return 1
 
     def key_action_menu(self, action: str) -> int:
-        if action == 'START GAME!':
-            pass
-        elif action == 'SETTINGS':
-            pass
-        elif action == 'ABOUT':
-            pass
-        elif action == 'EXIT':
-            return 0
 
+        if self.in_menu == 1:  # Main menu
+            if action == 'START GAME!':
+                self.mf = MinedField(self.mf.side, self.mf.height, self.mf.amount)
+                self.render_field(self.mf)
+                doupdate()
+
+            elif action == 'SETTINGS':
+                self.in_menu = 2
+                self.select = 1
+
+                self.render_menu(self.menus[self.in_menu], 1)
+
+            elif action == 'ABOUT':
+                self.in_menu = 3
+                self.select = 1
+                self.render_menu(self.menus[self.in_menu], 1)
+
+            elif action == 'EXIT':
+                return 0
+
+        elif self.in_menu == 2:  # Settings menu
+            if action == 'APPLY':
+                pass
+
+            if action == '<< BACK <<':
+                self.in_menu = 1
+                self.select = 1
+                self.render_menu(self.menus[1], 1)
+                pass
+
+        elif self.in_menu == 3:  # About menu
+            if action == 'github.com/rtss00/py-sweeper':
+                webbrowser.open('https://github.com/rtss00/py-sweeper')
+
+            elif action == '<< BACK <<':
+                self.in_menu = 1
+                self.select = 1
+                self.render_menu(self.menus[1], 1)
 
