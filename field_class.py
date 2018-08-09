@@ -177,7 +177,7 @@ class MinedField:
         ret = []
         for i in [-1, 0, 1]:
             for j in [-1, 0, 1]:
-                if (1 <= x+i <= self.side) and (1 <= y+j <= self.side):
+                if (1 <= x+i <= self.side) and (1 <= y+j <= self.height):
                     new_pos = self.t_pos(x+i, y+j)
                     ret.append(new_pos)
         return ret
